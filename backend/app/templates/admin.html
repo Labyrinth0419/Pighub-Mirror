@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Image Mirror{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow-md p-6">
+    <h2 class="text-2xl font-bold mb-6">Manage Sources</h2>
+
+    <!-- Add Source Form -->
+    <div class="mb-8 p-4 bg-gray-50 rounded">
+        <h3 class="text-lg font-semibold mb-4">Add New Source</h3>
+        <form id="addSourceForm" class="flex gap-4 items-end">
+            <div class="flex-1">
+                <label class="block text-sm text-gray-600">URL</label>
+                <input type="url" name="url" placeholder="https://example.com" class="w-full px-3 py-2 border rounded"
+                    required>
+            </div>
+            <div class="w-48">
+                <label class="block text-sm text-gray-600">Name (Optional)</label>
+                <input type="text" name="name" placeholder="My Site" class="w-full px-3 py-2 border rounded">
+            </div>
+            <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Add</button>
+        </form>
+    </div>
+
+    <!-- Sources List -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full table-auto">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="px-4 py-2 text-left">ID</th>
+                    <th class="px-4 py-2 text-left">Name</th>
+                    <th class="px-4 py-2 text-left">URL</th>
+                    <th class="px-4 py-2 text-left">Last Crawled</th>
+                    <th class="px-4 py-2 text-left">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="sourcesTableBody">
+                <!-- Populated by JS -->
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = '/login';
+    }
+
+    async function fetchSources() {
+        const response = await fetch('/api/sources', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.status === 401) window.location.href = '/login';
+        const sources = await response.json();
+        const tbody = document.getElementById('sourcesTableBody');
+        tbody.innerHTML = sources.map(s => `
+        <tr class="border-b">
+            <td class="px-4 py-2">${s.id}</td>
+            <td class="px-4 py-2">${s.name || '-'}</td>
+            <td class="px-4 py-2 truncate max-w-xs">${s.url}</td>
+            <td class="px-4 py-2">${s.last_crawled ? new Date(s.last_crawled).toLocaleString() : 'Never'}</td>
+            <td class="px-4 py-2 space-x-2">
+                <button onclick="crawlSource(${s.id})" class="text-blue-500 hover:text-blue-700">Crawl</button>
+                <button onclick="deleteSource(${s.id})" class="text-red-500 hover:text-red-700">Delete</button>
+            </td>
+        </tr>
+    `).join('');
+    }
+
+    async function crawlSource(id) {
+        const response = await fetch(`/api/crawl/${id}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) alert('Crawl started!');
+    }
+
+    async function deleteSource(id) {
+        if (!confirm('Are you sure?')) return;
+        const response = await fetch(`/api/sources/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) fetchSources();
+    }
+
+    document.getElementById('addSourceForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+
+        const response = await fetch('/api/sources', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            e.target.reset();
+            fetchSources();
+        }
+    });
+
+    // Initial load
+    fetchSources();
+</script>
+{% endblock %}

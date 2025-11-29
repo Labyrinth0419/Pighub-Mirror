@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    {% for image in images %}
+    <div class="bg-white rounded-lg shadow overflow-hidden image-card">
+        <a href="/images/{{ image.filename }}" target="_blank">
+            <img src="/images/{{ image.filename }}" alt="Image" class="w-full h-48 object-cover">
+        </a>
+        <div class="p-2 text-xs text-gray-500 truncate">
+            {{ image.created_at.strftime('%Y-%m-%d %H:%M') }}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="mt-8 flex justify-center space-x-4">
+    {% if page > 1 %}
+    <a href="/?page={{ page - 1 }}" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Previous</a>
+    {% endif %}
+
+    <span class="px-4 py-2 text-gray-700">Page {{ page }} of {{ total_pages }}</span>
+
+    {% if page < total_pages %} <a href="/?page={{ page + 1 }}"
+        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Next</a>
+        {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Image Mirror{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md mt-10">
+    <h2 class="text-2xl font-bold mb-6 text-center">Admin Login</h2>
+    <form id="loginForm" class="space-y-4">
+        <div>
+            <label class="block text-gray-700">Username</label>
+            <input type="text" id="username" name="username"
+                class="w-full px-4 py-2 border rounded focus:outline-none focus:border-blue-500" required>
+        </div>
+        <div>
+            <label class="block text-gray-700">Password</label>
+            <input type="password" id="password" name="password"
+                class="w-full px-4 py-2 border rounded focus:outline-none focus:border-blue-500" required>
+        </div>
+        <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Login</button>
+        <p id="errorMsg" class="text-red-500 text-sm hidden"></p>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+
+        try {
+            const response = await fetch('/token', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('token', data.access_token);
+                window.location.href = '/admin';
+            } else {
+                document.getElementById('errorMsg').textContent = 'Invalid credentials';
+                document.getElementById('errorMsg').classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    });
+</script>
+{% endblock %}
