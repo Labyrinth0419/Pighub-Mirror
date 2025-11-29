@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: image_mirror
+    container_name: pighub_mirror
     restart: always
     ports:
       - "8000:8000"
