@@ -134,3 +134,68 @@ async def crawl_pighub(limit: int = 20):
     db.commit()
     db.close()
     logger.info(f"Finished crawl. Downloaded {images_downloaded}/{images_found}")
+
+async def crawl_all_images():
+    """
+    全量同步所有图片
+    """
+    db = database.SessionLocal()
+    logger.info("Starting FULL SYNC from Pighub API")
+    
+    log = models.CrawlLog(status="running", error_message="Full Sync")
+    db.add(log)
+    db.commit()
+
+    images_found = 0
+    images_downloaded = 0
+    status_msg = "success"
+    error_msg = None
+
+    try:
+        async with httpx.AsyncClient(follow_redirects=True, timeout=60.0) as client:
+            # 获取全量列表
+            api_url = f"{BASE_URL}/api/all-images"
+            response = await client.get(api_url)
+            
+            if response.status_code == 200:
+                data = response.json()
+                images_list = data.get("images", [])
+                images_found = len(images_list)
+                logger.info(f"Found {images_found} images in full sync list")
+                
+                # 使用信号量限制并发下载数量，避免过大压力
+                sem = asyncio.Semaphore(10)
+                
+                async def safe_download(img_data):
+                    async with sem:
+                        return await download_image(client, img_data, db)
+
+                tasks = []
+                for img_data in images_list:
+                    tasks.append(safe_download(img_data))
+                
+                # 分批处理，避免一次性创建过多任务
+                batch_size = 50
+                for i in range(0, len(tasks), batch_size):
+                    batch = tasks[i:i + batch_size]
+                    results = await asyncio.gather(*batch)
+                    images_downloaded += sum(results)
+                    logger.info(f"Processed batch {i}-{i+len(batch)}. Downloaded so far: {images_downloaded}")
+
+            else:
+                raise Exception(f"API returned status {response.status_code}")
+
+    except Exception as e:
+        logger.error(f"Full sync failed: {e}")
+        status_msg = "failed"
+        error_msg = str(e)
+    
+    # 更新日志
+    log.status = status_msg
+    log.images_found = images_found
+    log.images_downloaded = images_downloaded
+    log.error_message = f"Full Sync: {error_msg}" if error_msg else "Full Sync"
+    
+    db.commit()
+    db.close()
+    logger.info(f"Finished FULL SYNC. Downloaded {images_downloaded}/{images_found}")

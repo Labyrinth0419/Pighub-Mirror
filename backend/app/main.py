@@ -45,6 +45,15 @@ def create_initial_user():
         db_user = models.User(username="admin", hashed_password=hashed_password)
         db.add(db_user)
         db.commit()
+    
+    # Check if we need to run full sync
+    image_count = db.query(models.Image).count()
+    if image_count == 0:
+        print("Database is empty. Triggering FULL SYNC...")
+        from . import crawler
+        import asyncio
+        asyncio.create_task(crawler.crawl_all_images())
+
     db.close()
     
     # Start Scheduler
