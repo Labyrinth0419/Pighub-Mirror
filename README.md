@@ -23,6 +23,7 @@
 
 - Docker
 - Docker Compose
+- **生产环境**: 域名（用于 HTTPS）
 
 ### 部署步骤
 
@@ -32,16 +33,23 @@
    cd pighub
    ```
 
-2. 启动服务：
+2. **配置域名（生产环境）**：
+   - 编辑 `Caddyfile`，将 `your-domain.com` 替换为您的域名
+   - 确保域名 DNS 已指向服务器 IP
+
+3. 启动服务：
    ```bash
    docker-compose up -d --build
    ```
 
-3. 访问应用：
-   - **前台图库**: `http://localhost:8000`
-   - **后台管理**: `http://localhost:8000/admin`
+4. 访问应用：
+   - **生产环境**: `https://your-domain.com` (自动 HTTPS)
+   - **本地测试**: `http://localhost:8000`
+   - **后台管理**: 访问 `/admin`
      - 默认账号: `admin`
      - 默认密码: `admin` (请在生产环境中修改)
+
+> **注意**: 图片复制功能需要 HTTPS 环境。详见 [HTTPS_SETUP.md](HTTPS_SETUP.md)
 
 ## 开发指南
 

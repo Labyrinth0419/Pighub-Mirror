@@ -14,3 +14,22 @@ services:
     environment:
       - DATABASE_URL=sqlite:///./data/app.db
       - SECRET_KEY=${SECRET_KEY}
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: pighub_caddy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./certs:/certs
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+
+volumes:
+  caddy_data:
+  caddy_config:

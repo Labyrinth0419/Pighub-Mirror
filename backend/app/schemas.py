@@ -16,7 +16,7 @@ class SourceURL(SourceURLBase):
     last_crawled: Optional[datetime] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class ImageBase(BaseModel):
     remote_id: int
@@ -35,7 +35,7 @@ class Image(ImageBase):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class CrawlLogBase(BaseModel):
     status: str
@@ -49,7 +49,7 @@ class CrawlLog(CrawlLogBase):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class Token(BaseModel):
     access_token: str
@@ -57,3 +57,9 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Optional[str] = None
+
+class ImagePagination(BaseModel):
+    data: List[Image]
+    total: int
+    page: int
+    limit: int

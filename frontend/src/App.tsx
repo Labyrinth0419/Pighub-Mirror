@@ -10,18 +10,18 @@ const { Header, Content, Footer } = Layout;
 const App: React.FC = () => {
   return (
     <Router>
-      <Layout className="layout" style={{ minHeight: '100vh' }}>
-        <Header>
-          <div className="logo" style={{ float: 'left', color: 'white', fontSize: '20px', fontWeight: 'bold', marginRight: '30px' }}>
-            Image Mirror
+      <Layout className="layout" style={{ minHeight: '100vh', backgroundColor: '#ffffff' }}>
+        <Header style={{ backgroundColor: '#fff', borderBottom: '1px solid #e8e8e8' }}>
+          <div className="logo" style={{ float: 'left', color: '#333', fontSize: '20px', fontWeight: 'bold', marginRight: '30px' }}>
+            Pighub Mirror
           </div>
-          <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['1']}>
+          <Menu theme="light" mode="horizontal" defaultSelectedKeys={['1']}>
             <Menu.Item key="1"><Link to="/">Gallery</Link></Menu.Item>
             <Menu.Item key="2"><Link to="/admin">Admin</Link></Menu.Item>
           </Menu>
         </Header>
-        <Content style={{ padding: '0 50px' }}>
-          <div className="site-layout-content" style={{ margin: '16px 0' }}>
+        <Content style={{ padding: '0', backgroundColor: '#ffffff' }}>
+          <div className="site-layout-content" style={{ margin: '0' }}>
             <Routes>
               <Route path="/" element={<Gallery />} />
               <Route path="/login" element={<Login />} />
@@ -29,7 +29,7 @@ const App: React.FC = () => {
             </Routes>
           </div>
         </Content>
-        <Footer style={{ textAlign: 'center' }}>Image Mirror ©2024</Footer>
+        <Footer style={{ textAlign: 'center', backgroundColor: '#fff', borderTop: '1px solid #e8e8e8' }}>Pighub Mirror ©2024</Footer>
       </Layout>
     </Router>
   );
