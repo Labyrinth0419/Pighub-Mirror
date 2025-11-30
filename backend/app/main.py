@@ -204,9 +204,19 @@ def create_initial_user():
 
 from fastapi.responses import FileResponse
 
+# Serve specific static files before catch-all
+@app.get("/pig.svg")
+async def serve_pig_svg():
+    from fastapi.responses import FileResponse
+    pig_path = "app/static/pig.svg"
+    if os.path.exists(pig_path):
+        return FileResponse(pig_path, media_type="image/svg+xml")
+    raise HTTPException(status_code=404, detail="Not found")
+
 # Catch-all for SPA
 @app.get("/{full_path:path}")
 async def serve_spa(full_path: str):
+    from fastapi.responses import FileResponse
     # API requests should have been handled by specific routes or return 404 if not found
     if full_path.startswith("api") or full_path.startswith("images") or full_path.startswith("assets"):
          raise HTTPException(status_code=404, detail="Not Found")
