@@ -10,7 +10,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./data:/app/data
+      - ./data:/mnt/Storage1/pighub_data
     environment:
       - DATABASE_URL=sqlite:///./data/app.db
       - SECRET_KEY=${SECRET_KEY}
@@ -20,8 +20,8 @@ services:
     container_name: pighub_caddy
     restart: always
     ports:
-      - "80:80"
-      - "443:443"
+      - "8180:80"
+      - "8543:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ./certs:/certs
