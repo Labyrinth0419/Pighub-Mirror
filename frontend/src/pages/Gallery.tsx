@@ -76,6 +76,10 @@ const Gallery: React.FC = () => {
                 }
 
                 try {
+                    if (!navigator.clipboard || !navigator.clipboard.write) {
+                        message.error('剪贴板功能不可用，请使用 HTTPS 访问或使用下载按钮');
+                        return;
+                    }
                     await navigator.clipboard.write([
                         new ClipboardItem({
                             'image/png': pngBlob
@@ -84,7 +88,7 @@ const Gallery: React.FC = () => {
                     message.success('图片已复制到剪贴板');
                 } catch (err) {
                     console.error('Clipboard write failed:', err);
-                    message.error('复制失败，请使用下载按钮');
+                    message.error('复制失败，请使用 HTTPS 访问或下载按钮');
                 }
             }, 'image/png');
 
@@ -98,15 +102,24 @@ const Gallery: React.FC = () => {
     const handleCopyBase64 = async (item: Image, e: React.MouseEvent) => {
         e.stopPropagation();
         try {
+            if (!navigator.clipboard || !navigator.clipboard.writeText) {
+                message.error('剪贴板功能不可用，请使用 HTTPS 访问');
+                return;
+            }
             const url = getImageUrl(item.local_path);
             const response = await fetch(url);
             const blob = await response.blob();
             const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64 = reader.result as string;
-                const html = `<img src="${base64}" alt="${item.title}" />`;
-                navigator.clipboard.writeText(html);
-                message.success('HTML (Base64) 已复制到剪贴板');
+            reader.onloadend = async () => {
+                try {
+                    const base64 = reader.result as string;
+                    const html = `<img src="${base64}" alt="${item.title}" />`;
+                    await navigator.clipboard.writeText(html);
+                    message.success('HTML (Base64) 已复制到剪贴板');
+                } catch (err) {
+                    console.error('Clipboard writeText failed:', err);
+                    message.error('复制失败，请使用 HTTPS 访问');
+                }
             };
             reader.readAsDataURL(blob);
         } catch (error) {
