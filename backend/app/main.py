@@ -56,7 +56,7 @@ async def read_users_me(current_user: models.User = Depends(auth.get_current_use
 @app.get("/api/images", response_model=schemas.ImagePagination)
 def read_images(page: int = 1, limit: int = 20, db: Session = Depends(database.get_db)):
     skip = (page - 1) * limit
-    images = db.query(models.Image).order_by(models.Image.created_at.desc()).offset(skip).limit(limit).all()
+    images = db.query(models.Image).order_by(models.Image.remote_id.desc()).offset(skip).limit(limit).all()
     total = db.query(models.Image).count()
     
     return {
@@ -169,10 +169,24 @@ def create_initial_user():
     db = database.SessionLocal()
     user = db.query(models.User).first()
     if not user:
-        hashed_password = auth.get_password_hash("admin")
-        db_user = models.User(username="admin", hashed_password=hashed_password)
+        import secrets
+        import string
+        # Generate a strong random password: 16 characters with letters, digits and symbols
+        alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+        random_password = ''.join(secrets.choice(alphabet) for i in range(16))
+        
+        hashed_password = auth.get_password_hash(random_password)
+        db_user = models.User(username="Labyrinth", hashed_password=hashed_password)
         db.add(db_user)
         db.commit()
+        
+        # Print credentials for first-time setup
+        print("=" * 60)
+        print("🔐 初始管理员账户已创建:")
+        print(f"   用户名: Labyrinth")
+        print(f"   密码: {random_password}")
+        print("   ⚠️  请立即登录并妥善保存此密码！")
+        print("=" * 60)
     
     # Check if we need to run full sync
     image_count = db.query(models.Image).count()

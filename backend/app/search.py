@@ -22,7 +22,7 @@ def search_images(query: str, db: Session, limit: int = 20):
     
     # 查询数据库
     results = db.query(models.Image).filter(or_(*conditions)).order_by(
-        models.Image.created_at.desc()
+        models.Image.remote_id.desc()
     ).limit(limit).all()
     
     return results
