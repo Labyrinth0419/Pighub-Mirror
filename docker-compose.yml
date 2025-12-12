@@ -21,10 +21,8 @@ services:
     restart: always
     ports:
       - "8180:80"
-      - "8543:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./certs:/certs
       - caddy_data:/data
       - caddy_config:/config
     depends_on:

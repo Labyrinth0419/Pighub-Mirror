@@ -11,4 +11,3 @@ bcrypt==3.2.2
 python-jose[cryptography]==3.3.0
 aiofiles==23.2.1
 Pillow==10.2.0
-jieba==0.42.1
