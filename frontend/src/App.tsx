@@ -12,7 +12,7 @@ const AppContent: React.FC = () => {
 
     // Determine selected menu key based on current path
     const getSelectedKey = () => {
-        if (location.pathname === '/admin') return ['2'];
+        if (location.pathname === '/admin' || location.pathname === '/login') return ['2'];
         return ['1']; // Default to Gallery for '/' and other paths
     };
 
